@@ -24,8 +24,14 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["client", "admin", "professional"],
+      enum: ["client", "admin", "professional", "labAdmin"],
       default: "client"
+    },
+    // Para labAdmin: qual lab ele administra
+    labId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Lab',
+      default: null
     },
     phone: {
       type: String,
@@ -41,7 +47,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Hash da senha antes de salvar
+// Faz hash da senha antes de salvar
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   

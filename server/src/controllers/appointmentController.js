@@ -3,6 +3,13 @@ const Appointment = require('../models/Appointment');
 const Service = require('../models/Service');
 const User = require('../models/User');
 const moment = require('moment');
+const {
+  sendEmail,
+  appointmentCreatedTemplate,
+  appointmentConfirmedTemplate,
+  appointmentCancelledTemplate,
+  newAppointmentForProfessionalTemplate
+} = require('../utils/emailService');
 
 // @desc    Obter todos os agendamentos
 // @route   GET /api/appointments
@@ -15,7 +22,7 @@ const getAppointments = async (req, res) => {
     
     // Filtros baseados no role do usuário
     if (req.user.role === 'client') {
-      query.client = req.user.id;
+      query.usuarioId = req.user.id;
     } else if (req.user.role === 'professional') {
       query.professional = req.user.id;
     }
@@ -36,13 +43,12 @@ const getAppointments = async (req, res) => {
     }
     
     if (client && req.user.role === 'admin') {
-      query.client = client;
+      query.usuarioId = client;
     }
-    
+    // Buscar agendamentos
     const appointments = await Appointment.find(query)
-      .populate('client', 'name email phone')
-      .populate('service', 'name duration price')
-      .populate('professional', 'name email phone')
+      .populate('usuarioId', 'name email phone')
+      .populate('labId', 'nome localizacao')
       .sort({ date: 1, startTime: 1 });
     
     res.json({
@@ -166,6 +172,35 @@ const createAppointment = async (req, res) => {
       .populate('service', 'name duration price')
       .populate('professional', 'name email phone');
     
+    // Enviar emails (não bloqueante)
+    const dateFormatted = moment(appointment.date).format('DD/MM/YYYY');
+    
+    // Email para o cliente
+    sendEmail(
+      populatedAppointment.client.email,
+      appointmentCreatedTemplate(
+        populatedAppointment.client.name,
+        populatedAppointment.service.name,
+        dateFormatted,
+        appointment.startTime,
+        populatedAppointment.professional?.name || 'A ser designado'
+      )
+    );
+    
+    // Email para o profissional
+    if (populatedAppointment.professional?.email) {
+      sendEmail(
+        populatedAppointment.professional.email,
+        newAppointmentForProfessionalTemplate(
+          populatedAppointment.professional.name,
+          populatedAppointment.client.name,
+          populatedAppointment.service.name,
+          dateFormatted,
+          appointment.startTime
+        )
+      );
+    }
+    
     res.status(201).json({
       success: true,
       data: populatedAppointment
@@ -215,6 +250,9 @@ const updateAppointment = async (req, res) => {
     }
     
     // Atualizar campos permitidos
+    const previousStatus = appointment.status;
+    const statusChanged = status && status !== previousStatus;
+    
     if (status && ['pending', 'confirmed', 'cancelled', 'completed'].includes(status)) {
       appointment.status = status;
     }
@@ -230,6 +268,33 @@ const updateAppointment = async (req, res) => {
       .populate('client', 'name email phone')
       .populate('service', 'name duration price')
       .populate('professional', 'name email phone');
+    
+    // Enviar emails quando o status muda (não bloqueante)
+    if (statusChanged && populatedAppointment.client?.email) {
+      const dateFormatted = moment(appointment.date).format('DD/MM/YYYY');
+      
+      if (appointment.status === 'confirmed') {
+        sendEmail(
+          populatedAppointment.client.email,
+          appointmentConfirmedTemplate(
+            populatedAppointment.client.name,
+            populatedAppointment.service.name,
+            dateFormatted,
+            appointment.startTime
+          )
+        );
+      } else if (appointment.status === 'cancelled') {
+        sendEmail(
+          populatedAppointment.client.email,
+          appointmentCancelledTemplate(
+            populatedAppointment.client.name,
+            populatedAppointment.service.name,
+            dateFormatted,
+            appointment.startTime
+          )
+        );
+      }
+    }
     
     res.json({
       success: true,

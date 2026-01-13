@@ -1,4 +1,5 @@
 // src/server.js
+// Servidor principal da API de Agendamento
 require('dotenv').config();
 
 const express = require('express');
@@ -12,6 +13,9 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
+const labRoutes = require('./routes/labRoutes');
+const equipmentRoutes = require('./routes/equipmentRoutes');
+const appointmentLabRoutes = require('./routes/appointmentRoutesLabs');
 
 // Configurações iniciais
 const PORT = process.env.PORT || 5001;
@@ -57,6 +61,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/appointments', appointmentRoutes);
+// Rotas para LABS
+app.use('/api/labs', labRoutes);
+app.use('/api/labs/:labId/equipment', equipmentRoutes);
+app.use('/api/appointments-labs', appointmentLabRoutes);
 
 // Handler de erros (DEVE ser o último middleware)
 app.use(errorHandler);
