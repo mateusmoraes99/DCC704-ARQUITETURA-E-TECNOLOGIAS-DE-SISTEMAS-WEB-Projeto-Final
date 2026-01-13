@@ -1,4 +1,5 @@
 // test-moment.js
+// Script para testar a instalação do moment
 try {
     const moment = require('moment');
     console.log('✅ Moment instalado corretamente!');

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { BiCalendar, BiUser, BiLogOut, BiLogIn, BiUserPlus } from 'react-icons/bi';
+import { BiCalendar, BiUser, BiLogOut, BiLogIn, BiUserPlus, BiAdjust } from 'react-icons/bi';
 
 const Header = () => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -40,6 +40,39 @@ const Header = () => {
                   Dashboard
                 </Link>
               </li>
+              
+              {/* Labs - disponível para todos */}
+              <li className="nav-item">
+                <Link to="/labs" className="nav-link">
+                  🔬 Laboratórios
+                </Link>
+              </li>
+
+              {/* Meus Agendamentos em Labs */}
+              <li className="nav-item">
+                <Link to="/my-lab-appointments" className="nav-link">
+                  📅 Meus Agendamentos em Labs
+                </Link>
+              </li>
+              
+              {/* Lab Admin - apenas para labAdmin */}
+              {user?.role === 'labAdmin' && (
+                <li className="nav-item">
+                  <Link to="/my-lab" className="nav-link">
+                    ⚙️ Meu Lab
+                  </Link>
+                </li>
+              )}
+              
+              {isAdmin && (
+                <li className="nav-item">
+                  <Link to="/admin/dashboard" className="nav-link">
+                    <BiAdjust className="me-1" />
+                    Admin
+                  </Link>
+                </li>
+              )}
+              
               <li className="nav-item">
                 <Link to="/services" className="nav-link">
                   Serviços
@@ -81,6 +114,12 @@ const Header = () => {
             </ul>
           ) : (
             <ul className="navbar-nav ms-auto">
+              {/* Labs - visível mesmo sem autenticação */}
+              <li className="nav-item">
+                <Link to="/labs" className="nav-link">
+                  🔬 Laboratórios
+                </Link>
+              </li>
               <li className="nav-item">
                 <Link to="/login" className="btn btn-primary me-2">
                   <BiLogIn className="me-1" />

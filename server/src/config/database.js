@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+// Conexão com MongoDB
 const connectDB = async () => {
   try {
     // Use valor padrão se MONGODB_URI não estiver definido

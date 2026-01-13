@@ -1,6 +1,7 @@
 // src/controllers/authController.js
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { sendEmail, welcomeEmailTemplate } = require('../utils/emailService');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -32,6 +33,9 @@ const register = async (req, res) => {
       phone,
       role: role || 'client'
     });
+    
+    // Enviar email de boas-vindas (não bloqueante)
+    sendEmail(user.email, welcomeEmailTemplate(user.name));
     
     res.status(201).json({
       success: true,
@@ -207,7 +211,7 @@ const updatePassword = async (req, res) => {
     });
   }
 };
-
+// Exportar controladores
 module.exports = {
   register,
   login,

@@ -1,0 +1,151 @@
+/* Customizações para react-big-calendar */
+.rbc-calendar {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.rbc-header {
+  padding: 12px 3px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #495057;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.rbc-today {
+  background-color: #e7f3ff;
+}
+
+.rbc-off-range-bg {
+  background: #fafafa;
+}
+
+.rbc-event {
+  padding: 2px 5px;
+  background-color: #007bff;
+  border-radius: 4px;
+  border: none;
+}
+
+.rbc-event-label {
+  font-size: 0.75rem;
+}
+
+.rbc-event-content {
+  font-size: 0.8rem;
+  white-space: normal;
+}
+
+.rbc-day-bg {
+  border-left: 1px solid #dee2e6;
+}
+
+.rbc-month-header {
+  padding: 10px 3px;
+}
+
+.rbc-month-row {
+  border-top: 1px solid #dee2e6;
+  min-height: 100px;
+}
+
+.rbc-date-cell {
+  padding: 4px 4px;
+  text-align: right;
+}
+
+.rbc-toolbar {
+  padding: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.rbc-toolbar button {
+  color: #495057;
+  border: 1px solid #dee2e6;
+  background: #fff;
+  padding: 5px 10px;
+  margin: 5px 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.rbc-toolbar button:hover {
+  background: #f8f9fa;
+  border-color: #0d6efd;
+  color: #0d6efd;
+}
+
+.rbc-toolbar button.rbc-active {
+  background: #0d6efd;
+  color: #fff;
+  border-color: #0d6efd;
+}
+
+.rbc-toolbar-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #212529;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.rbc-week-container {
+  position: relative;
+  border-top: 1px solid #dee2e6;
+}
+
+.rbc-time-slot {
+  border-top: 1px solid #dee2e6;
+}
+
+.rbc-current-time-indicator {
+  background-color: #dc3545;
+  height: 2px;
+}
+
+.rbc-popup {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.rbc-show-more {
+  background: #e7f3ff;
+  color: #0d6efd;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.rbc-show-more:hover {
+  background: #cce5ff;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .rbc-toolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rbc-toolbar-label {
+    order: -1;
+    width: 100%;
+  }
+
+  .rbc-month-row {
+    min-height: 80px;
+  }
+
+  .rbc-event {
+    font-size: 0.65rem;
+    padding: 1px 2px;
+  }
+}

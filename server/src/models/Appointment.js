@@ -2,76 +2,93 @@ const mongoose = require("mongoose");
 
 const appointmentSchema = new mongoose.Schema(
   {
-    client: {
+    // Cliente que agendou
+    usuarioId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Cliente é obrigatório"]
+      required: [true, "Usuário é obrigatório"]
     },
-    service: {
+
+    // Lab agendado (MUDANÇA: era serviceId, agora labId)
+    labId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Service",
-      required: [true, "Serviço é obrigatório"]
+      ref: "Lab",
+      required: [true, "Lab é obrigatório"]
     },
-    professional: {
+
+    // Equipamentos que será usado (NOVO)
+    equipmentIds: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-    },
-    date: {
+      ref: "Equipment"
+    }],
+
+    // Datas do agendamento (novo: suporta múltiplos dias)
+    datas: [{
       type: Date,
-      required: [true, "Data é obrigatória"]
-    },
-    startTime: {
+      required: [true, "Datas são obrigatórias"]
+    }],
+
+    // Horário (fixo: 08:00-18:00)
+    horarioInicio: {
       type: String,
       required: [true, "Horário de início é obrigatório"],
       match: [/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato de hora inválido (use HH:MM)"]
     },
-    endTime: {
-      type: String
+
+    horarioFim: {
+      type: String,
+      required: [true, "Horário de fim é obrigatório"]
     },
+
+    // Observações do cliente
+    observacoes: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Observações não podem exceder 500 caracteres"]
+    },
+
+    // Status do agendamento
     status: {
       type: String,
       enum: ["pending", "confirmed", "cancelled", "completed"],
       default: "pending"
     },
-    notes: {
-      type: String,
-      trim: true,
-      maxlength: [500, "Notas não podem exceder 500 caracteres"]
-    }
-  },
-  {
-    timestamps: true
+
+    // Quem confirmou
+    confirmadoPor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null
+    },
+
+    // Data/motivo cancelamento
+    dataCancelamento: Date,
+    motivoCancelamento: String,
+
+    dataCriacao: {
+      type: Date,
+      default: Date.now
+    },
+
+    dataAtualizacao: {
+      type: Date,
+      default: Date.now
+    },
+
+    dataConfirmacao: Date
   }
 );
 
-// Calcular endTime automaticamente
-appointmentSchema.pre("save", async function (next) {
-  if (this.isModified("service") || this.isModified("startTime")) {
-    try {
-      const Service = mongoose.model("Service");
-      const service = await Service.findById(this.service);
-      
-      if (service) {
-        const [hours, minutes] = this.startTime.split(":").map(Number);
-        const startDate = new Date(this.date);
-        startDate.setHours(hours, minutes, 0, 0);
-        
-        const endDate = new Date(startDate.getTime() + service.duration * 60000);
-        const endHours = endDate.getHours().toString().padStart(2, "0");
-        const endMinutes = endDate.getMinutes().toString().padStart(2, "0");
-        this.endTime = endHours + ":" + endMinutes;
-      }
-    } catch (error) {
-      return next(error);
-    }
-  }
+// Atualizar dataAtualizacao
+appointmentSchema.pre("save", function(next) {
+  this.dataAtualizacao = Date.now();
   next();
 });
 
 // Índices para performance
-appointmentSchema.index({ date: 1, startTime: 1 });
-appointmentSchema.index({ client: 1 });
-appointmentSchema.index({ professional: 1 });
+appointmentSchema.index({ datas: 1, labId: 1 });
+appointmentSchema.index({ usuarioId: 1 });
+appointmentSchema.index({ labId: 1 });
 
 const Appointment = mongoose.model("Appointment", appointmentSchema);
 module.exports = Appointment;

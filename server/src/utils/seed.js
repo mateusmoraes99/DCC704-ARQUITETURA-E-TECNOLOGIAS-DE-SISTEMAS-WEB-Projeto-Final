@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const Service = require('../models/Service');
 const Appointment = require('../models/Appointment');
+const Lab = require('../models/Lab');
+const Equipment = require('../models/Equipment');
 require('dotenv').config();
 
 const seedDatabase = async () => {
@@ -16,6 +18,8 @@ const seedDatabase = async () => {
     await User.deleteMany({});
     await Service.deleteMany({});
     await Appointment.deleteMany({});
+    await Lab.deleteMany({});
+    await Equipment.deleteMany({});
     console.log('🧹 Dados antigos removidos');
 
     // Criar usuários
@@ -101,28 +105,85 @@ const seedDatabase = async () => {
 
     console.log(`✂️ ${await Service.countDocuments()} serviços criados`);
 
-    // Criar agendamentos
+    // Criar labs
+    const lab1 = await Lab.create({
+      nome: 'Laboratório de Análises Clínicas',
+      descricao: 'Laboratório especializado em análises clínicas e exames de sangue',
+      localizacao: 'Av. Principal, 1000 - Boa Vista, RR',
+      adminId: professional1._id,
+      ativo: true,
+      foto: '/uploads/labs/lab1.jpg',
+      telefone: '(95) 3198-1234',
+      email: 'lab1@agendamento.com',
+      diasFuncionamento: ['segunda', 'terça', 'quarta', 'quinta', 'sexta'],
+      horarioAbertura: '08:00',
+      horarioFechamento: '18:00'
+    });
+
+    const lab2 = await Lab.create({
+      nome: 'Laboratório de Biologia Molecular',
+      descricao: 'Laboratório com tecnologia avançada para análises moleculares',
+      localizacao: 'Rua das Flores, 500 - Boa Vista, RR',
+      adminId: professional2._id,
+      ativo: true,
+      foto: '/uploads/labs/lab2.jpg',
+      telefone: '(95) 3198-5678',
+      email: 'lab2@agendamento.com',
+      diasFuncionamento: ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'],
+      horarioAbertura: '07:00',
+      horarioFechamento: '19:00'
+    });
+
+    console.log(`🏥 ${await Lab.countDocuments()} laboratórios criados`);
+
+    // Criar equipamentos
+    const equipment1 = await Equipment.create({
+      nome: 'Centrífuga Automática',
+      descricao: 'Equipamento para centrifugação de amostras',
+      labId: lab1._id,
+      status: 'ativo'
+    });
+
+    const equipment2 = await Equipment.create({
+      nome: 'Analisador Bioquímico',
+      descricao: 'Analisador automático para testes bioquímicos',
+      labId: lab1._id,
+      status: 'ativo'
+    });
+
+    const equipment3 = await Equipment.create({
+      nome: 'Sequenciador Genético',
+      descricao: 'Equipamento para sequenciamento de DNA',
+      labId: lab2._id,
+      status: 'ativo'
+    });
+
+    console.log(`🔧 ${await Equipment.countDocuments()} equipamentos criados`);
+
+    // Criar agendamentos para labs
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     await Appointment.create([
       {
-        client: client1._id,
-        service: services[0]._id,
-        professional: professional1._id,
-        date: tomorrow,
-        startTime: '09:00',
+        usuarioId: client1._id,
+        labId: lab1._id,
+        equipmentIds: [equipment1._id, equipment2._id],
+        datas: [tomorrow],
+        horarioInicio: '09:00',
+        horarioFim: '10:00',
         status: 'confirmed',
-        notes: 'Primeira vez no salão'
+        observacoes: 'Coleta de sangue para análise de rotina'
       },
       {
-        client: client1._id,
-        service: services[1]._id,
-        professional: professional1._id,
-        date: tomorrow,
-        startTime: '14:00',
+        usuarioId: client1._id,
+        labId: lab2._id,
+        equipmentIds: [equipment3._id],
+        datas: [tomorrow],
+        horarioInicio: '14:00',
+        horarioFim: '15:30',
         status: 'pending',
-        notes: 'Manutenção da barba'
+        observacoes: 'Testes de sequenciamento genético'
       }
     ]);
 
@@ -132,7 +193,8 @@ const seedDatabase = async () => {
     console.log('\n👤 Credenciais de teste:');
     console.log('   Admin: admin@agendamento.com / senha123');
     console.log('   Cliente: cliente@agendamento.com / senha123');
-    console.log('   Profissional: joao@agendamento.com / senha123');
+    console.log('   Profissional 1 (Lab Admin): joao@agendamento.com / senha123');
+    console.log('   Profissional 2 (Lab Admin): maria@agendamento.com / senha123');
 
     process.exit(0);
   } catch (error) {
